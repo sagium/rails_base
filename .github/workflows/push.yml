@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Building and test the image
+      - name: Building and testing the image
         run: /bin/bash .github/workflows/helpers/build_image.sh
 
       - name: Push to DockerHub
