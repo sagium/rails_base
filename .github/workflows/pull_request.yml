@@ -1,4 +1,4 @@
-name: Docker Build - Push to DockerHub
+name: Docker Build - Pull request checks
 
 on: [ pull_request ]
 
@@ -20,12 +20,16 @@ jobs:
 
       - name: Check RUBY version
         run: |
+          export RUBY_VERSION=$(cat .ruby-version | head -n 1)
+          export NODE_VERSION=$(cat .nvmrc | head -n 1)
           RUBY_VERSION_FOR_GREP=$(echo $RUBY_VERSION | sed 's/-/ /g')
           HAS_RUBY=$(docker run --rm sagium2/rails_base:${RUBY_VERSION}_node-${NODE_VERSION} /bin/bash -l -c "ruby -v | grep '${RUBY_VERSION_FOR_GREP}'")
           if [ -n "${HAS_RUBY}" ]; then echo ${HAS_RUBY}; else exit 1; fi
 
       - name: Check NODE version
         run: |
+          export RUBY_VERSION=$(cat .ruby-version | head -n 1)
+          export NODE_VERSION=$(cat .nvmrc | head -n 1)
           NODE_VERSION_FOR_GREP="v$(echo $NODE_VERSION)"
           HAS_NODE=$(docker run --rm sagium2/rails_base:${RUBY_VERSION}_node-${NODE_VERSION} /bin/bash -l -c "node -v | grep '${NODE_VERSION_FOR_GREP}'")
           if [ -n "${HAS_NODE}" ]; then echo ${HAS_NODE}; else exit 1; fi
