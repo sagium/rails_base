@@ -11,6 +11,8 @@ ENV NODE_VERSION $NODE_VERSION
 RUN echo 'LC_ALL="en_US.UTF-8"' > /etc/default/locale; \
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections; \
     apt update && apt install -y \
+                      vim \
+                      git \
                       sudo \
                       curl \
                       procps \
@@ -30,7 +32,10 @@ RUN curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh -o 
     touch ~/.profile; \
     bash tmp/install_nvm.sh && rm tmp/install_nvm.sh; \
     . ~/.nvm/nvm.sh && . ~/.nvm/bash_completion && nvm install v$NODE_VERSION && npm install -g yarn; \
-    rm -rf ~/.nvm/.cache
+    rm -rf ~/.nvm/.cache; \
+    echo -e 'export NVM_DIR="$HOME/.nvm"\n' >> ~/.bash_profile; \
+    echo -e '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"\n' >> ~/.bash_profile; \
+    echo -e '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"\n' >> ~/.bash_profile
 
 # Installing RVM
 RUN curl -sSL get.rvm.io | bash; \
@@ -39,7 +44,6 @@ RUN curl -sSL get.rvm.io | bash; \
     echo 'install: --no-document' > ~/.gemrc; \
     echo 'update: --no-document' > ~/.gemrc; \
     gem install bundler; \
-    echo -e '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" \n\n' >> ~/.bashrc; \
     rvm cleanup all; \
     sudo rm -rf /var/lib/apt/lists/* && sudo apt autoclean
 
