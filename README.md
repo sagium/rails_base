@@ -15,12 +15,15 @@ this image locally.
 
 **To build any Ruby/Node combination**
 ```
-export RUBY_VERSION=$(cat .ruby-version | head -n 1) && export NODE_VERSION=$(cat .nvmrc | head -n 1) && docker build --build-arg RUBY_VERSION=${RUBY_VERSION} --build-arg NODE_VERSION=${NODE_VERSION} --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t rails_base:${RUBY_VERSION}_node-${NODE_VERSION} .
+echo "ruby-2.7.1" > .ruby-version
+echo "10.15.2" > .nvmrc
+
+USER_UID=$(id -u) USER_GID=$(id -g) .github/workflows/helpers/build_image.sh 
 ```
 
 **To run a development console**
 ```
-docker-compose run --rm web /bin/bash
+docker-compose run --rm web /bin/bash -l
 ```
 
 **Example docker-compose.yml**
@@ -39,28 +42,34 @@ services:
     restart: always
 
   web: &app_base
-    image: rails_base
-    build:
-      context: .
-      dockerfile: docker/dockerfiles/base/Dockerfile
-      args:
-        USER_UID: $USER_UID
-        USER_GID: $USER_GID
-        NODE_VERSION: $NODE_VERSION
-        RUBY_VERSION: $RUBY_VERSION
+    image: sagium2/rails_base:ruby-2.7.1_node-10.15.2
     ports:
       - "3000:3000"
     environment:
-      GEM_HOME: '/home/user/.rvm/gems'
-      GEM_PATH: '/home/user/.rvm/gems'
       PATH: "/home/user/.rvm/gems/*/bin:/home/user/.rvm/gems/*@global/bin:/home/user/.rvm/rubies/*/bin:/home/user/.rvm/bin:/home/user/.nvm/versions/node/*/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/user/app/bin"
+      WEBPACKER_DEV_SERVER_HOST: webpacker
     env_file:
       - .env
     depends_on:
       - db
+      - webpacker
     volumes:
       - .:/home/user/app
       - ../docker/volumes/gems:/home/user/.rvm/gems
+
+  webpacker:
+    image: sagium2/rails_base:ruby-2.7.1_node-10.15.2
+    ports:
+      - '3035:3035'
+    environment:
+      WEBPACKER_DEV_SERVER_HOST: 0.0.0.0
+    command: "/bin/bash -c -l ./bin/webpack-dev-server"
+    env_file:
+      - .env
+    volumes:
+      - .:/home/user/app
+      - ../docker/volumes/gems:/home/user/.rvm/gems
+
 ```
 
 **Mounting volumes**
@@ -70,6 +79,5 @@ so that you don't erase your gems every time you run `docker-compose down`
 
 ```
 volumes:
-      - .:/home/user/app
       - ../docker/volumes/gems:/home/user/.rvm/gems
 ```

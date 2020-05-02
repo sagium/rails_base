@@ -21,7 +21,10 @@ RUN echo 'LC_ALL="en_US.UTF-8"' > /etc/default/locale; \
 RUN groupadd -g $USER_GID user; \
     useradd --shell "/bin/bash" -u $USER_UID -g $USER_GID -m user; \
     echo "user ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers; \
-    echo -e "\nexport PATH=\$PATH:$HOME/app/bin\n" >> ~/.bashrc
+    echo 'export PATH="$PATH:/home/user/app/bin"' >> /etc/profile; \
+    echo 'export NVM_DIR="$HOME/.nvm"' >> /etc/profile; \
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /etc/profile; \
+    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /etc/profile
 
 USER user
 
@@ -32,10 +35,7 @@ RUN curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh -o 
     touch ~/.profile; \
     bash tmp/install_nvm.sh && rm tmp/install_nvm.sh; \
     . ~/.nvm/nvm.sh && . ~/.nvm/bash_completion && nvm install v$NODE_VERSION && npm install -g yarn; \
-    rm -rf ~/.nvm/.cache; \
-    echo -e 'export NVM_DIR="$HOME/.nvm"\n' >> ~/.bash_profile; \
-    echo -e '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"\n' >> ~/.bash_profile; \
-    echo -e '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"\n' >> ~/.bash_profile
+    rm -rf ~/.nvm/.cache
 
 # Installing RVM
 RUN curl -sSL get.rvm.io | bash; \
