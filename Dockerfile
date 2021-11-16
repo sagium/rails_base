@@ -16,6 +16,8 @@ RUN echo 'LC_ALL="en_US.UTF-8"' > /etc/default/locale; \
                       sudo \
                       curl \
                       procps \
+                      libmagickwand-dev \
+                      libmysqlclient-dev \
                       libpq-dev && rm -rf /var/lib/apt/lists/* && apt autoclean
 
 RUN groupadd -g $USER_GID user; \
